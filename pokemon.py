@@ -456,6 +456,7 @@ async def use(message, move1, move2=""):
                                     if poke_data_user[2]>=100:
                                         poke_data_user[1] = int(int(poke_data_user[1])+1)
                                         poke_data_user[2] = 0
+                                print(mypokeevol)
                                 if mypokeevol == "No Evolution":
                                     pass
                                 elif mypokeevol == "Fire Stone":
@@ -463,6 +464,8 @@ async def use(message, move1, move2=""):
                                 elif mypokeevol == "Water Stone":
                                     pass
                                 elif mypokeevol == "Thunder Stone":
+                                    pass
+                                elif mypokeevol == "":
                                     pass
                                 else:
                                     mypokeevol = int(mypokeevol)
@@ -600,7 +603,7 @@ async def use(message, move1, move2=""):
 # complete
 @client.command(breif = "pokeball", aliases = ["pb"])
 async def pokeball(message):
-    global wild_poke, poke_level, catch_mode, wild_hp, poke_hp, my_poke, pokemon_data
+    global wild_poke, poke_level, catch_mode, wild_hp, poke_hp, my_poke, pokemon_data, mypokeevol
     
     username = message.author.mention
 
