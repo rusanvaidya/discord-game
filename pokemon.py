@@ -45,7 +45,7 @@ def database_initialize():
     return conn, cursor
 
 # completed
-@client.command(brief = "start game")
+@client.command(brief = "start game", aliases=['p'])
 async def pokemon(message):
     username = message.author.mention
 
