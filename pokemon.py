@@ -446,17 +446,17 @@ async def use(message, move1, move2=""):
                         query1 = f"SELECT pokemon, pokedex FROM MY_POKEMON WHERE name = '{username}';"
                         userdata_sql = sqlio.read_sql_query(query1,conn)
                         pokedex = userdata_sql["pokedex"].values[0]
-                        each_poke_data = userdata_sql.values[0][0].split(";")
+                        pokeda = userdata_sql["pokemon"].values[0]
+                        each_poke_data = pokeda.split(";")
                         pokedict1_add = ""
                         for pokes in each_poke_data:
                             if pokes.__contains__(my_poke):
                                 poke_data_user = pokes.split(",")
                                 if poke_data_user[0] == my_poke:
-                                    poke_data_user[2] = int(poke_data_user[2])+((100/poke_level)*5)
+                                    poke_data_user[2] = round(int(int(poke_data_user[2])+((100/poke_level)*wild_level)))
                                     if poke_data_user[2]>=100:
-                                        poke_data_user[1] = int(int(poke_data_user[1])+1)
+                                        poke_data_user[1] = round(int(int(poke_data_user[1])+1))
                                         poke_data_user[2] = 0
-                                print(mypokeevol)
                                 if mypokeevol == "No Evolution":
                                     pass
                                 elif mypokeevol == "Fire Stone":
@@ -464,8 +464,6 @@ async def use(message, move1, move2=""):
                                 elif mypokeevol == "Water Stone":
                                     pass
                                 elif mypokeevol == "Thunder Stone":
-                                    pass
-                                elif mypokeevol == "":
                                     pass
                                 else:
                                     mypokeevol = int(mypokeevol)
@@ -488,11 +486,22 @@ async def use(message, move1, move2=""):
                                         evolution = discord.Embed(title= f"Your {my_poke} evolved into {poke_data_user[0]}.")
                                         evolution.set_thumbnail(url = f"https://assets.pokemon.com/assets/cms2/img/pokedex/full/%03d.png"%pokenum)
                                         await message.send(embed=evolution)
-                                pokedict1_add = pokedict1_add + f"{poke_data_user}"
+                                        
+                                if poke_hp < 0:
+                                    poke_hp = 0
+                                poke_data_user[3]=poke_hp 
+                                pokedict1_add = pokedict1_add + f"{poke_data_user};"
+                            else:
+                                pokedict1_add = pokedict1_add + pokes+";"
                         pokedict1_add = pokedict1_add.replace("[","")
-                        pokedict1_add = pokedict1_add.replace("]",";")
+                        pokedict1_add = pokedict1_add.replace("]","")
                         pokedict1_add = pokedict1_add.replace("'","")
                         pokedict1_add = pokedict1_add.replace(" ","")
+                        catch_mode = False
+                        battle_mode = False
+                        wild_poke = ''
+                        
+                        pokedict1_add = pokedict1_add.replace(";;",";")
                         pokedex_add = pokedex + f"{wild_poke};"
                         update_query = f"UPDATE MY_POKEMON SET pokemon = '{pokedict1_add}', pokedex = '{pokedex_add}' WHERE name = '{username}';"
                         cursor.execute(update_query)
@@ -634,9 +643,9 @@ async def pokeball(message):
                     if pokes.__contains__(my_poke):
                         poke_data_user = pokes.split(",")
                         if poke_data_user[0] == my_poke:
-                            poke_data_user[2] = int(int(poke_data_user[2])+((100/poke_level)*wild_level))
+                            poke_data_user[2] = round(int(int(poke_data_user[2])+((100/poke_level)*wild_level)))
                             if poke_data_user[2]>=100:
-                                poke_data_user[1] = int(int(poke_data_user[1])+1)
+                                poke_data_user[1] = round(int(int(poke_data_user[1])+1))
                                 poke_data_user[2] = 0
                         if mypokeevol == "No Evolution":
                             pass
@@ -675,14 +684,17 @@ async def pokeball(message):
                     else:
                         pokedict1_add = pokedict1_add + pokes+";"
                 pokedict1_add = pokedict1_add.replace("[","")
-                pokedict1_add = pokedict1_add.replace("]",";")
+                pokedict1_add = pokedict1_add.replace("]","")
                 pokedict1_add = pokedict1_add.replace("'","")
                 pokedict1_add = pokedict1_add.replace(" ","")
                 
                 if pokeda.__contains__(wild_poke):
                     pass
                 else:
+                    print(pokedict1_add)
+                    pokedict1_add = pokedict1_add.replace(";;",";")
                     pokedict1_add = pokedict1_add + f"{wild_poke},{wild_level},0,{wild_hp};"
+                    print(pokedict1_add)
                 if pokedex.__contains__(wild_poke):
                     pokedex_add = pokedex
                 else:
@@ -690,7 +702,6 @@ async def pokeball(message):
                     personal_lvl = personal_lvl + 1
                     update_level = f"UPDATE PLAYER SET level = '{personal_lvl}' WHERE name = '{username}';"
                     cursor.execute(update_level)
-                pokedict1_add = pokedict1_add.replace(";;",";")
                 update_query = f"UPDATE MY_POKEMON SET pokemon = '{pokedict1_add}', pokedex = '{pokedex_add}' WHERE name = '{username}';"
                 cursor.execute(update_query)
                 catch_mode = False
@@ -713,7 +724,8 @@ async def pokeball(message):
         else:
             await message.send(f"You cannot catch pokemon at this moment")
     else:
-        await message.send("You Don't Have Pokeball")    
+        await message.send("You Don't Have Pokeball")
+    
 
 @client.command(breif = "heal your pokemon for $5")
 async def heal(message):
@@ -826,9 +838,9 @@ async def challenge(message, gym_leader):
 
                 gym_choice = random.choice(gym_pokemon)
                 if gym_choice == 'Geodude':
-                    gym_level = 15
+                    gym_level = 14
                 if gym_choice == 'Onix':
-                    gym_level = 17
+                    gym_level = 15
 
                 gym_lead = discord.Embed(title = "Pewter City Gym", description = f"Brock: Get Ready To Rumble. Let's Go {gym_choice}", color=0x99aab5)
                 file = discord.File("image/brock.png", filename="brock.png")
@@ -864,9 +876,9 @@ async def challenge(message, gym_leader):
 
                 gym_choice = random.choice(gym_pokemon)
                 if gym_choice == 'Staryu':
-                    gym_level = 25
+                    gym_level = 23
                 if gym_choice == 'Starmie':
-                    gym_level = 30
+                    gym_level = 25
 
                 gym_lead = discord.Embed(title = "Cerulean City Gym", description = f"Misty: Get Ready To Rumble. Let's Go {gym_choice}", color=0x99aab5)
                 file = discord.File("image/misty.png", filename="misty.png")
@@ -902,7 +914,7 @@ async def challenge(message, gym_leader):
                 if gym_choice == 'Electrode':
                     gym_level = 30
                 if gym_choice == 'Raichu':
-                    gym_level = 33
+                    gym_level = 35
 
                 gym_lead = discord.Embed(title = "Vermilion City Gym", description = f"Lt. Surge: Get Ready To Rumble. Let's Go {gym_choice}", color=0x99aab5)
                 file = discord.File("image/surge.png", filename="surge.png")
